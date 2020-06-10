@@ -1,0 +1,1 @@
+http://bildr.org/2012/08/rotary-encoder-arduino/
