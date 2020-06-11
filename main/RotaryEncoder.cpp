@@ -31,6 +31,17 @@ void RotaryEncoder::UpdateEncoder(void)
      _lastEncoded = encoded;
 }
 
+void RotaryEncoder::Trigger(void)
+{
+  _latch = true;
+}
+
+void RotaryEncoder::ResetButton()
+{
+  _latch = false;
+}
+
+
 long RotaryEncoder::Value()
 {
     return _encoderValue;
@@ -38,10 +49,10 @@ long RotaryEncoder::Value()
 
 bool RotaryEncoder::WasPushed()
 {
-    return !digitalRead(_button);
+    return _latch;
 }
 
-void RotaryEncoder::init(void (*ISR_callback)(void))
+void RotaryEncoder::init(void (*rotaryCallback)(void), void (*buttonCallback)(void))
 {
     pinMode(_pin1, INPUT);
     pinMode(_pin2, INPUT);
@@ -51,6 +62,7 @@ void RotaryEncoder::init(void (*ISR_callback)(void))
     digitalWrite(_pin2, HIGH);
     digitalWrite(_button, HIGH);
 
-    attachInterrupt(0, ISR_callback, CHANGE);
-    attachInterrupt(1, ISR_callback, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(_pin1), rotaryCallback, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(_pin2), rotaryCallback, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(_button), buttonCallback, RISING);
 }
