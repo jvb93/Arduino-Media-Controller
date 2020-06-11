@@ -1,18 +1,18 @@
 #include "RotaryEncoder.h"
 #include "Button.h"
+#include "HID-Project.h"
 
-int encoderPin1 = 2;
-int encoderPin2 = 3;
-int encoderSwitchPin = 18;
-int playButtonPin = 19;
-int nextButtonPin = 20;
-int previousButtonPin = 21;
+int encoderPin1 = 0;
+int encoderPin2 = 1;
+int encoderSwitchPin = 2;
+int nextButtonPin = 3;
+int previousButtonPin = 7;
 
 
 RotaryEncoder* rotaryEncoder;
-Button* playButton;
 Button* nextButton;
 Button* previousButton;
+
 
 
 int lastValue = 0;
@@ -20,12 +20,10 @@ int lastValue = 0;
 void setup() 
 {
   Serial.begin (9600);
+  Consumer.begin();
+
   rotaryEncoder = new RotaryEncoder(encoderPin1, encoderPin2, encoderSwitchPin);
   rotaryEncoder->init([]{rotaryEncoder->UpdateEncoder();}, []{rotaryEncoder->Trigger();});
-  
-  playButton = new Button(playButtonPin);
-  playButton->init([]{playButton->Trigger();});
-
   nextButton = new Button(nextButtonPin);
   nextButton->init([] { nextButton->Trigger(); });
 
@@ -38,7 +36,7 @@ void loop()
 
   if (rotaryEncoder->WasPushed()) 
   {
-    Serial.println("mute pushed");
+    Consumer.write(MEDIA_PLAY_PAUSE);
     rotaryEncoder->ResetButton();
   }
 
@@ -46,34 +44,31 @@ void loop()
 
   if (currentValue < lastValue) 
   {
-    Serial.println("volume down");
+    Consumer.write(MEDIA_VOLUME_DOWN);
+    Consumer.write(MEDIA_VOLUME_DOWN);
+    Consumer.write(MEDIA_VOLUME_DOWN);
   }
 
   else if (currentValue > lastValue)
   {
-    Serial.println("volume up");
+    Consumer.write(MEDIA_VOLUME_UP);
+    Consumer.write(MEDIA_VOLUME_UP);
+    Consumer.write(MEDIA_VOLUME_UP);
   }
-
 
   lastValue = currentValue;
 
-  if (playButton->WasPushed())
-  {
-    Serial.println("play pushed");
-    playButton->Reset();
-  }
-
   if (nextButton->WasPushed())
   {
-    Serial.println("next pushed");
+    Consumer.write(MEDIA_NEXT);
     nextButton->Reset();
   }
   
   if (previousButton->WasPushed())
   {
-    Serial.println("previous pushed");
+    Consumer.write(MEDIA_PREVIOUS);
     previousButton->Reset();
   }
-
-  delay(100); 
+  
+  delay(500); 
 }
