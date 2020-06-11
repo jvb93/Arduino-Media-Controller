@@ -6,69 +6,62 @@ int encoderPin1 = 0;
 int encoderPin2 = 1;
 int encoderSwitchPin = 2;
 int nextButtonPin = 3;
+int pauseButtonPin = 4;
 int previousButtonPin = 7;
-
 
 RotaryEncoder* rotaryEncoder;
 Button* nextButton;
 Button* previousButton;
-
-
+Button* pauseButton;
 
 int lastValue = 0;
 
 void setup() 
 {
-  Serial.begin (9600);
   Consumer.begin();
 
   rotaryEncoder = new RotaryEncoder(encoderPin1, encoderPin2, encoderSwitchPin);
-  rotaryEncoder->init([]{rotaryEncoder->UpdateEncoder();}, []{rotaryEncoder->Trigger();});
+  rotaryEncoder->init([]{rotaryEncoder->UpdateEncoder();});
+  
   nextButton = new Button(nextButtonPin);
-  nextButton->init([] { nextButton->Trigger(); });
-
   previousButton = new Button(previousButtonPin);
-  previousButton->init([] { previousButton->Trigger(); });
+  pauseButton = new Button(pauseButtonPin);
 }
 
 void loop() 
 {
-
-  if (rotaryEncoder->WasPushed()) 
-  {
-    Consumer.write(MEDIA_PLAY_PAUSE);
-    rotaryEncoder->ResetButton();
-  }
-
   int currentValue = rotaryEncoder->Value();
 
   if (currentValue < lastValue) 
   {
-    Consumer.write(MEDIA_VOLUME_DOWN);
-    Consumer.write(MEDIA_VOLUME_DOWN);
     Consumer.write(MEDIA_VOLUME_DOWN);
   }
 
   else if (currentValue > lastValue)
   {
     Consumer.write(MEDIA_VOLUME_UP);
-    Consumer.write(MEDIA_VOLUME_UP);
-    Consumer.write(MEDIA_VOLUME_UP);
   }
 
   lastValue = currentValue;
 
-  if (nextButton->WasPushed())
+  if (rotaryEncoder->IsPushed()) 
+  {
+    Consumer.write(MEDIA_VOLUME_MUTE);
+  }
+
+  if (nextButton->IsPushed())
   {
     Consumer.write(MEDIA_NEXT);
-    nextButton->Reset();
   }
-  
-  if (previousButton->WasPushed())
+
+  if (previousButton->IsPushed())
   {
     Consumer.write(MEDIA_PREVIOUS);
-    previousButton->Reset();
   }
-  
-  delay(500); 
+
+  if (pauseButton->IsPushed())
+  {
+    Consumer.write(MEDIA_PLAY_PAUSE);
+  }
+
 }

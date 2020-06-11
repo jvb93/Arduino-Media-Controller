@@ -1,4 +1,5 @@
 #include "RotaryEncoder.h"
+#include "Button.h"
 
 RotaryEncoder::RotaryEncoder(int pin1, int pin2, int button)
 {
@@ -8,6 +9,8 @@ RotaryEncoder::RotaryEncoder(int pin1, int pin2, int button)
     _encoderValue = 0;
     _lastEncoded = 0;
     _lastencoderValue = 0;
+
+    _encoderButton = new Button(_button);
 }
 
 void RotaryEncoder::UpdateEncoder(void)
@@ -31,28 +34,18 @@ void RotaryEncoder::UpdateEncoder(void)
      _lastEncoded = encoded;
 }
 
-void RotaryEncoder::Trigger(void)
-{
-  _latch = true;
-}
-
-void RotaryEncoder::ResetButton()
-{
-  _latch = false;
-}
-
 
 long RotaryEncoder::Value()
 {
     return _encoderValue;
 }
 
-bool RotaryEncoder::WasPushed()
+bool RotaryEncoder::IsPushed()
 {
-    return _latch;
+    return _encoderButton->IsPushed();
 }
 
-void RotaryEncoder::init(void (*rotaryCallback)(void), void (*buttonCallback)(void))
+void RotaryEncoder::init(void (*rotaryCallback)(void))
 {
     pinMode(_pin1, INPUT);
     pinMode(_pin2, INPUT);
@@ -64,5 +57,4 @@ void RotaryEncoder::init(void (*rotaryCallback)(void), void (*buttonCallback)(vo
 
     attachInterrupt(digitalPinToInterrupt(_pin1), rotaryCallback, CHANGE);
     attachInterrupt(digitalPinToInterrupt(_pin2), rotaryCallback, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(_button), buttonCallback, RISING);
 }
