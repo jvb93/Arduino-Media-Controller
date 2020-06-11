@@ -3,29 +3,34 @@
 Button::Button(int pin)
 {   
     _pin = pin;
-    _latch = false;
-}
+    _lastButtonState = LOW;
+    _lastDebounceTime = 0;
+    _debounceDelay = 50;
 
-void Button::Trigger(void)
-{
-    _latch = true;
-}
-
-void Button::Reset(void)
-{
-    _latch = false;
-}
-
-bool Button::WasPushed(void)
-{
-    return _latch;
-}
-
-void Button::init(void (*ISR_callback)(void))
-{
     pinMode(_pin, INPUT);
-   
     digitalWrite(_pin, HIGH);
+}
 
-    attachInterrupt(digitalPinToInterrupt(_pin), ISR_callback, RISING);
+bool Button::IsPushed()
+{
+    int reading = digitalRead(_pin);
+    bool toReturn = false;
+
+    if (reading != _lastButtonState)
+    {
+        _lastDebounceTime = millis();
+    }
+
+    if ((millis() - _lastDebounceTime) > _debounceDelay)
+    {
+        if (reading != _buttonState)
+        {
+            _buttonState = reading;
+            toReturn = _buttonState == HIGH;
+        }
+    }
+
+    _lastButtonState = reading;
+    
+    return toReturn;
 }

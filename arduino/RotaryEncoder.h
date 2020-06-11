@@ -2,6 +2,7 @@
 #define RotaryEncoder_h
 
 #include <Arduino.h>
+#include "Button.h"
 
 class RotaryEncoder
 {
@@ -9,22 +10,18 @@ class RotaryEncoder
         int _pin1;
         int _pin2;
         int _button;
-        bool _latch;
         volatile long _encoderValue;
         volatile int _lastEncoded;
         long _lastencoderValue;
         void(*rotaryCallback)();
-        void(*buttonCallback)();
+        Button * _encoderButton;
 
     public:
         RotaryEncoder(int pin1, int pin2, int button);
         void UpdateEncoder();
-        void Trigger();
-        void ResetButton();
         long Value();
-        bool WasPushed();
-        void init(void (*rotaryCallback)(void), void (*buttonCallback)(void));
-
+        bool IsPushed();
+        void init(void (*rotaryCallback)(void));
 };
 
 #endif

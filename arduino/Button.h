@@ -7,16 +7,14 @@ class Button
 {
     private:
         int _pin;
-        bool _latch;
-        void(*ISR_callback)();
-
+        int _lastButtonState;
+        int _buttonState;
+        unsigned long _lastDebounceTime;
+        unsigned long _debounceDelay;
+        
     public:
         Button(int pin);
-        void Trigger();
-        void Reset();
-        bool WasPushed();
-        void init(void (*ISR_callback)(void));
-
+        bool IsPushed();
 };
 
 #endif
